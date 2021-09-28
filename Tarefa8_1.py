@@ -1,0 +1,69 @@
+import pygame
+from random import randint
+
+pygame.init()
+largura_tela, altura_tela = 800, 800
+tela = pygame.display.set_mode((largura_tela, altura_tela))
+
+PRETO = (0, 0, 0)
+yellow = 248, 255, 43
+tela.fill(PRETO)
+
+
+class Circle:
+    def __init__(self):
+        self.rad = 70
+        self.x_circ = tela.get_width() / 2
+        self.y_circ = tela.get_height() - 525
+        self.area = (self.x_circ, self.y_circ)
+        self.cor = yellow
+        self.fonte = pygame.font.SysFont('Comic Sans', 40, bold=False, italic=False)
+        self.texto = self.fonte.render("Clique Aqui", 1, PRETO)
+
+    def draw_circle(self, tela_def):
+        return pygame.draw.circle(tela_def, self.cor, self.area, self.rad)
+
+    def draw_text(self):
+        tela.blit(self.texto, (self.x_circ - 45, self.y_circ - 10))
+
+
+class Rect(pygame.Rect):
+    def __init__(self):
+        self.altura = 50
+        self.largura = 50
+        self.x_rct = randint(0, largura_tela)
+        self.y_rct = randint(0, altura_tela)
+        self.area = pygame.Rect(self.x_rct, self.y_rct, self.largura, self.altura)
+        self.cor = yellow
+
+    def draw_rect(self, tela_def):
+        pygame.draw.rect(tela_def, self.cor, self.area)
+
+
+list_rect = []
+terminou = False
+while not terminou:
+    tela.fill(PRETO)
+    for r in list_rect:
+        r.draw_rect(tela)
+    circle = Circle()
+    circle.draw_circle(tela)
+    circle.draw_text()
+    for event in pygame.event.get():
+        if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
+            x, y = pygame.mouse.get_pos()
+            if (circle.x_circ + circle.rad >= x >= circle.x_circ - circle.rad) and \
+                    (circle.y_circ - circle.rad <= y <= circle.y_circ + circle.rad):
+                rect = Rect()
+                rect.draw_rect(tela)
+                list_rect.append(rect)
+                for i, rect_2 in enumerate(list_rect):
+                    if rect_2 is not rect and pygame.Rect.colliderect(rect_2.area, rect.area):
+                        list_rect.pop(i)
+                        if rect in list_rect:
+                            list_rect.pop(-1)
+        if event.type == pygame.QUIT:
+            terminou = True
+        pygame.display.update()
+pygame.display.quit()
+pygame.quit()
